@@ -2,9 +2,8 @@
 
 declare(strict_types=1);
 
-namespace Hyperf\Telemetry;
+namespace Hyperf\Telemetry\Prometheus;
 
-use Hyperf\Telemetry\Adapter\Prometheus;
 use Hyperf\Telemetry\Contract\HistogramInterface;
 
 class Histogram implements HistogramInterface

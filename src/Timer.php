@@ -24,12 +24,18 @@ class Timer
         $this->time = microtime(true);
     }
 
-    public function ObserveDuration()
+    public function observeDuration()
     {
         $d = (float) microtime(true) - $this->time;
         if ($d < 0) {
             $d = (float)0;
         }
         $this->histogram->observe($d);
+    }
+
+    public function with(string ...$labelValues): self
+    {
+        $this->histogram->with(...$labelValues);
+        return $this;
     }
 }
