@@ -48,10 +48,6 @@ class Counter implements CounterInterface
     public function add(float $delta)
     {
         $this->delta = $delta;
-    }
-
-    public function __destruct()
-    {
         $process = ProcessCollector::get(static::TARGET_PROCESS_NAME)[0];
         $process->exportSocket()->send(serialize($this));
     }

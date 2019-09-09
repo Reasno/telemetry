@@ -53,15 +53,15 @@ class Gauge implements GaugeInterface
     public function set(float $value)
     {
         $this->value = $value;
+        $this->delta = null;
+        $process = ProcessCollector::get(static::TARGET_PROCESS_NAME)[0];
+        $process->exportSocket()->send(serialize($this));
     }
 
     public function add(float $delta)
     {
         $this->delta = $delta;
-    }
-
-    public function __destruct()
-    {
+        $this->value = null;
         $process = ProcessCollector::get(static::TARGET_PROCESS_NAME)[0];
         $process->exportSocket()->send(serialize($this));
     }

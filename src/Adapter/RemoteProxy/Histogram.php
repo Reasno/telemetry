@@ -48,10 +48,6 @@ class Histogram implements HistogramInterface
     public function observe(float $value)
     {
         $this->value = $value;
-    }
-
-    public function __destruct()
-    {
         $process = ProcessCollector::get(static::TARGET_PROCESS_NAME)[0];
         $process->exportSocket()->send(serialize($this));
     }
