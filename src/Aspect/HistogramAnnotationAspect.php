@@ -22,7 +22,7 @@ use Hyperf\Telemetry\Timer;
 /**
  * @Aspect
  */
-class TraceAnnotationAspect implements AroundInterface
+class HistogramAnnotationAspect implements AroundInterface
 {
     public $classes = [];
 

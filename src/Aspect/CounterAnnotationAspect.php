@@ -21,7 +21,7 @@ use Hyperf\Telemetry\Contract\CounterInterface;
 /**
  * @Aspect
  */
-class TraceAnnotationAspect implements AroundInterface
+class CounterAnnotationAspect implements AroundInterface
 {
     public $classes = [];
 

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Hyperf\Telemetry\RemoteProxy;
+namespace Hyperf\Telemetry\Adapter\RemoteProxy;
 
 use Hyperf\Process\ProcessCollector;
 use Hyperf\Telemetry\Contract\CounterInterface;
@@ -39,7 +39,7 @@ class Counter implements CounterInterface
         $this->labelNames = $labelNames;
     }
 
-    public function with(string ...$labelValues): self
+    public function with(string ...$labelValues): CounterInterface
     {
         $this->labelValues = $labelValues;
         return $this;

@@ -10,19 +10,16 @@ declare(strict_types=1);
  * @license  https://github.com/hyperf-cloud/hyperf/blob/master/LICENSE
  */
 
-namespace Hyperf\Tracer\Middleware;
+namespace Hyperf\Telemetry\Middleware;
 
-use Hyperf\Telemetry\Contract\TelemetryFactoryInterface;
+use Hyperf\Telemetry\Adapter\RemoteProxy\TelemetryFactory;
 use Hyperf\Telemetry\Timer;
-use Hyperf\Tracer\SpanStarter;
-use Hyperf\Utils\Coroutine;
-use OpenTracing\Tracer;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
-class TelemetryMiddeware implements MiddlewareInterface
+class TelemetryMiddleware implements MiddlewareInterface
 {
 
     /**
@@ -30,7 +27,7 @@ class TelemetryMiddeware implements MiddlewareInterface
      */
     private $factory;
 
-    public function __construct(TelemetryFactoryInterface $factory)
+    public function __construct(TelemetryFactory $factory)
     {
         $this->factory = $factory;
     }
@@ -43,15 +40,15 @@ class TelemetryMiddeware implements MiddlewareInterface
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        $counter = $factory->makeCounter('request_count', ['request_status','request_path', 'request_method']);
-        $histogram = $factory->makeHistogram('request_latency', ['request_status','request_path', 'request_method']);
+        $counter = $this->factory->makeCounter('request_count', ['request_status','request_path', 'request_method']);
+        $histogram = $this->factory->makeHistogram('request_latency', ['request_status','request_path', 'request_method']);
         $timer = new Timer($histogram);
         $response = $handler->handle($request);
         $timer
-            ->with($response->getStatusCode(), (string)$request->getUri(), $request->getMethod())
+            ->with((string)$response->getStatusCode(), (string)$request->getRequestTarget(), $request->getMethod())
             ->observeDuration();
         $counter
-            ->with($response->getStatusCode(), (string)$request->getUri(), $request->getMethod())
+            ->with((string)$response->getStatusCode(), (string)$request->getRequestTarget(), $request->getMethod())
             ->add(1);
         return $response;
     }

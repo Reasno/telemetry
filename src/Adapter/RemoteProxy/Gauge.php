@@ -44,7 +44,7 @@ class Gauge implements GaugeInterface
         $this->labelNames = $labelNames;
     }
 
-    public function with(string ...$labelValues): self
+    public function with(string ...$labelValues): GaugeInterface
     {
         $this->labelValues = $labelValues;
         return $this;

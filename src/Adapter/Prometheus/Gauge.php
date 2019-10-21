@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Hyperf\Telemetry\Prometheus;
+namespace Hyperf\Telemetry\Adapter\Prometheus;
 
 use Hyperf\Telemetry\Contract\GaugeInterface;
 
@@ -27,10 +27,10 @@ class Gauge implements GaugeInterface
     public function __construct(\Prometheus\CollectorRegistry $registry, string $namespace, string $name, string $help, array $labelNames)
     {
         $this->registry = $registry;
-        $this->gauge = $registry->getOrRegisterGauge($name, $help, $type, $labelNames);
+        $this->gauge = $registry->getOrRegisterGauge($namespace, $name, $help, $labelNames);
     }
 
-    public function with(string ...$labelValues): self
+    public function with(string ...$labelValues): GaugeInterface
     {
         $this->labelValues = $labelValues;
         return $this;

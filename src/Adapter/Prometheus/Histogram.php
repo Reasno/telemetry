@@ -2,9 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Hyperf\Telemetry\Prometheus;
+namespace Hyperf\Telemetry\Adapter\Prometheus;
 
 use Hyperf\Telemetry\Contract\HistogramInterface;
+use Prometheus\CollectorRegistry;
 
 class Histogram implements HistogramInterface
 {
@@ -24,13 +25,14 @@ class Histogram implements HistogramInterface
     protected $labelValues;
 
 
-    public function __construct(\Prometheus\CollectorRegistry $registry, string $namespace, string $name, string $help, array $labelNames)
+    public function __construct(CollectorRegistry $registry, string $namespace, string $name, string $help, array $labelNames)
     {
+        var_dump($labelNames);
         $this->registry = $registry;
-        $this->histogram = $registry->getOrRegisterHistogram($name, $help, $type, $labelNames);
+        $this->histogram = $registry->getOrRegisterHistogram($namespace, $name, $help, $labelNames);
     }
 
-    public function with(string ...$labelValues): self
+    public function with(string ...$labelValues): HistogramInterface
     {
         $this->labelValues = $labelValues;
         return $this;

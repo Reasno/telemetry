@@ -17,4 +17,5 @@ interface TelemetryFactoryInterface
     public function makeCounter($name, $labelNames): CounterInterface;
     public function makeGauge($name, $labelNames): GaugeInterface;
     public function makeHistogram($name, $labelNames): HistogramInterface;
+    public function handle(): void;
 }

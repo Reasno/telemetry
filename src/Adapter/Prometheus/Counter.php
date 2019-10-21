@@ -2,9 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Hyperf\Telemetry\Prometheus;
+namespace Hyperf\Telemetry\Adapter\Prometheus;
 
 use Hyperf\Telemetry\Contract\CounterInterface;
+use Prometheus\CollectorRegistry;
 
 class Counter implements CounterInterface
 {
@@ -24,13 +25,13 @@ class Counter implements CounterInterface
     protected $labelValues;
 
 
-    public function __construct(\Prometheus\CollectorRegistry $registry, string $namespace, string $name, string $help, array $labelNames)
+    public function __construct(CollectorRegistry $registry, string $namespace, string $name, string $help, array $labelNames)
     {
         $this->registry = $registry;
-        $this->counter = $registry->getOrRegisterCounter($name, $help, $type, $labelNames);
+        $this->counter = $registry->getOrRegisterCounter($namespace, $name, $help, $labelNames);
     }
 
-    public function with(string ...$labelValues): self
+    public function with(string ...$labelValues): CounterInterface
     {
         $this->labelValues = $labelValues;
         return $this;
@@ -38,11 +39,6 @@ class Counter implements CounterInterface
 
     public function add(float $delta)
     {
-        $processes = ProcessCollector::get(static::TARGET_PROCESS_NAME);
-        $process->exportSocket()->send(serialize(new ReporterMessage(
-            $this->options,
-            $spans
-        )));
         $this->counter->incBy($delta, $this->labelValues);
     }
 }

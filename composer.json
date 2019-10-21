@@ -1,12 +1,23 @@
 {
     "name": "hyperf/telemetry",
-    "type": "library",
     "license": "MIT",
     "keywords": [
         "php",
         "hyperf"
     ],
     "description": "hyperf telemetry component",
+    "require": {
+        "php": ">=7.2",
+        "jimdo/prometheus_client_php": "^0.9.1"
+    },
+    "require-dev": {
+        "malukenho/docheader": "^0.1.6",
+        "mockery/mockery": "^1.0",
+        "phpunit/phpunit": "^7.0.0",
+        "friendsofphp/php-cs-fixer": "^2.9"
+    },
+    "suggest": {
+    },
     "autoload": {
         "psr-4": {
             "Hyperf\\Telemetry\\": "src/"
@@ -14,33 +25,22 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "HyperfTest\\": "tests"
+            "HyperfTest\\Telemetry\\": "tests/"
         }
-    },
-    "require": {
-        "php": ">=7.2",
-        "ext-swoole": ">=4.3",
-        "hyperf/di": "1.0.*",
-        "hyperf/framework": "1.0.*",
-        "hyperf/process": "^1.0",
-        "hyperf/utils": "1.0.*",
-        "jimdo/prometheus_client_php": "^0.9.1"
-    },
-    "require-dev": {
-        "friendsofphp/php-cs-fixer": "^2.14",
-        "hyperf/testing": "1.0.*",
-        "phpstan/phpstan": "^0.10.5",
-        "swoft/swoole-ide-helper": "dev-master"
     },
     "config": {
         "sort-packages": true
     },
+    "bin": [
+    ],
     "scripts": {
-        "test": "co-phpunit -c phpunit.xml --colors=always",
-        "analyze": "phpstan analyse --memory-limit 300M -l 0 ./src",
-        "cs-fix": "php-cs-fixer fix $1"
+        "cs-fix": "php-cs-fixer fix $1",
+        "test": "phpunit --colors=always"
     },
     "extra": {
+        "branch-alias": {
+            "dev-master": "1.1-dev"
+        },
         "hyperf": {
             "config": "Hyperf\\Telemetry\\ConfigProvider"
         }
