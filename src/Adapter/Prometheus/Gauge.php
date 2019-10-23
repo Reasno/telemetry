@@ -13,7 +13,6 @@ declare(strict_types=1);
 namespace Hyperf\Telemetry\Adapter\Prometheus;
 
 use Hyperf\Telemetry\Contract\GaugeInterface;
-use Hyperf\Guzzle\ClientFactory as GuzzleClientFactory;
 
 class Gauge implements GaugeInterface
 {

@@ -12,8 +12,8 @@ declare(strict_types=1);
 
 namespace Hyperf\Telemetry\Adapter\StatsD;
 
-use Domnikl\Statsd\Connection\UdpSocket;
 use Domnikl\Statsd\Client;
+use Domnikl\Statsd\Connection\UdpSocket;
 use Hyperf\Contract\ConfigInterface;
 use Hyperf\Telemetry\Adapter\Statsd\Gauge;
 use Hyperf\Telemetry\Adapter\Statsd\Histogram;
@@ -22,7 +22,6 @@ use Hyperf\Telemetry\Contract\GaugeInterface;
 use Hyperf\Telemetry\Contract\HistogramInterface;
 use Hyperf\Telemetry\Contract\TelemetryFactoryInterface;
 use Hyperf\Utils\Coroutine;
-
 
 class TelemetryFactory implements TelemetryFactoryInterface
 {

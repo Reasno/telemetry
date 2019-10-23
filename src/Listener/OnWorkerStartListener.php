@@ -12,8 +12,6 @@ declare(strict_types=1);
 
 namespace Hyperf\Telemetry\Listener;
 
-use Hyperf\Contract\ConfigInterface;
-use Hyperf\Contract\StdoutLoggerInterface;
 use Hyperf\Event\Annotation\Listener;
 use Hyperf\Event\Contract\ListenerInterface;
 use Hyperf\Framework\Event\BeforeWorkerStart;
@@ -123,7 +121,7 @@ class OnWorkerStartListener implements ListenerInterface
             $out[$name] = $this
                 ->factory
                 ->makeGauge($name, ['worker_id'])
-                ->with((string)$workerId);
+                ->with((string) $workerId);
         }
         return $out;
     }

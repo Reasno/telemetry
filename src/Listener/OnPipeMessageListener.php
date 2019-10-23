@@ -12,7 +12,6 @@ declare(strict_types=1);
 
 namespace Hyperf\Telemetry\Listener;
 
-use Hyperf\Contract\StdoutLoggerInterface;
 use Hyperf\Event\Annotation\Listener;
 use Hyperf\Event\Contract\ListenerInterface;
 use Hyperf\Process\Event\PipeMessage;
@@ -34,7 +33,8 @@ class OnPipeMessageListener implements ListenerInterface
 
     public function __construct(ContainerInterface $container)
     {
-        $this->factory = $container->get(TelemetryFactoryInterface::class);    }
+        $this->factory = $container->get(TelemetryFactoryInterface::class);
+    }
 
     /**
      * @return string[] returns the events that you want to listen
