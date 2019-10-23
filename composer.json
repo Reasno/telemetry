@@ -17,6 +17,7 @@
         "friendsofphp/php-cs-fixer": "^2.9"
     },
     "suggest": {
+        "domnikl/statsd": "Required to use StatdD driver.",
     },
     "autoload": {
         "psr-4": {
