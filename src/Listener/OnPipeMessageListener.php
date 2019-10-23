@@ -32,17 +32,9 @@ class OnPipeMessageListener implements ListenerInterface
      */
     private $factory;
 
-    /**
-     * @var StdoutLoggerInterface
-     */
-    private $logger;
-
-
     public function __construct(ContainerInterface $container)
     {
-        $this->factory = $container->get(TelemetryFactoryInterface::class);
-        $this->logger = $container->get(StdoutLoggerInterface::class);
-    }
+        $this->factory = $container->get(TelemetryFactoryInterface::class);    }
 
     /**
      * @return string[] returns the events that you want to listen
@@ -61,28 +53,27 @@ class OnPipeMessageListener implements ListenerInterface
     public function process(object $event)
     {
         if (property_exists($event, 'data') && $event instanceof PipeMessage) {
-
             $inner = $event->data;
-            if ($inner instanceof Counter) {
-                $counter = $this->factory->makeCounter($inner->name, $inner->labelNames);
-                $counter->with(...$inner->labelValues)->add($inner->delta);
-                return;
-            }
-
-            if ($inner instanceof Gauge) {
-                $gauge = $this->factory->makeGauge($inner->name, $inner->labelNames);
-                if ($inner->value) {
-                    $gauge->with(...$inner->labelValues)->set($inner->value);
-                } else {
-                    $gauge->with(...$inner->labelValues)->add($inner->delta);
-                }
-                return;
-            }
-
-            if ($inner instanceof Histogram) {
-                $histogram = $this->factory->makeHistogram($inner->name, $inner->labelNames);
-                $histogram->with(...$inner->labelValues)->observe($inner->value);
-                return;
+            switch (true) {
+                case $inner instanceof Counter:
+                    $counter = $this->factory->makeCounter($inner->name, $inner->labelNames);
+                    $counter->with(...$inner->labelValues)->add($inner->delta);
+                    break;
+                case $inner instanceof Gauge:
+                    $gauge = $this->factory->makeGauge($inner->name, $inner->labelNames);
+                    if (isset($inner->value)) {
+                        $gauge->with(...$inner->labelValues)->set($inner->value);
+                    } else {
+                        $gauge->with(...$inner->labelValues)->add($inner->delta);
+                    }
+                    break;
+                case $inner instanceof Histogram:
+                    $histogram = $this->factory->makeHistogram($inner->name, $inner->labelNames);
+                    $histogram->with(...$inner->labelValues)->observe($inner->value);
+                    break;
+                default:
+                    // Nothing to do
+                    break;
             }
         }
     }

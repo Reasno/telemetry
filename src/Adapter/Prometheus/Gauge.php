@@ -1,10 +1,19 @@
 <?php
 
 declare(strict_types=1);
+/**
+ * This file is part of Hyperf.
+ *
+ * @link     https://www.hyperf.io
+ * @document https://doc.hyperf.io
+ * @contact  group@hyperf.io
+ * @license  https://github.com/hyperf-cloud/hyperf/blob/master/LICENSE
+ */
 
 namespace Hyperf\Telemetry\Adapter\Prometheus;
 
 use Hyperf\Telemetry\Contract\GaugeInterface;
+use Hyperf\Guzzle\ClientFactory as GuzzleClientFactory;
 
 class Gauge implements GaugeInterface
 {
@@ -22,7 +31,6 @@ class Gauge implements GaugeInterface
      * @var string[]
      */
     protected $labelValues;
-
 
     public function __construct(\Prometheus\CollectorRegistry $registry, string $namespace, string $name, string $help, array $labelNames)
     {
@@ -44,6 +52,6 @@ class Gauge implements GaugeInterface
 
     public function add(float $delta)
     {
-        $this->counter->incBy($delta, $this->labelValues);
+        $this->gauge->incBy($delta, $this->labelValues);
     }
 }

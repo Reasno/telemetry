@@ -16,7 +16,7 @@ use Hyperf\Di\Annotation\Aspect;
 use Hyperf\Di\Aop\AroundInterface;
 use Hyperf\Di\Aop\ProceedingJoinPoint;
 use Hyperf\Telemetry\Annotation\Counter;
-use Hyperf\Telemetry\Contract\CounterInterface;
+use Hyperf\Telemetry\Contract\TelemetryFactoryInterface;
 
 /**
  * @Aspect
@@ -34,9 +34,11 @@ class CounterAnnotationAspect implements AroundInterface
      */
     private $factory;
 
-    public function __construct(TelemetryFactoryInterface $factory)
+    public function __construct()
     {
-        $this->factory = $factory;
+        // Must inject a short lived instance because the underlying class
+        // is subject to change based on the runtime and configuration.
+        $this->factory = make(TelemetryFactoryInterface::class);
     }
 
     /**

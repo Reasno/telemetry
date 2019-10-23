@@ -12,7 +12,6 @@ declare(strict_types=1);
 
 namespace Hyperf\Telemetry;
 
-use Hyperf\Telemetry\Adapter\RemoteProxy\TelemetryProxy;
 use Hyperf\Telemetry\Contract\TelemetryFactoryInterface;
 use Prometheus\Storage\Adapter;
 use Prometheus\Storage\InMemory;
@@ -23,14 +22,24 @@ class ConfigProvider
     {
         return [
             'dependencies' => [
-                TelemetryFactoryInterface::class => TracerFactoryPicker::class,
+                TelemetryFactoryInterface::class => TelemetryFactoryPicker::class,
                 Adapter::class => InMemory::class,
             ],
             'commands' => [
             ],
-            'scan' => [
-                'paths' => [
-                    __DIR__,
+            'annotations' => [
+                'scan' => [
+                    'paths' => [
+                        __DIR__,
+                    ],
+                ],
+            ],
+            'publish' => [
+                [
+                    'id' => 'config',
+                    'description' => 'The config for telemetry component.',
+                    'source' => __DIR__ . '/../publish/telemetry.php',
+                    'destination' => BASE_PATH . '/config/autoload/telemetry.php',
                 ],
             ],
         ];

@@ -1,6 +1,14 @@
 <?php
 
 declare(strict_types=1);
+/**
+ * This file is part of Hyperf.
+ *
+ * @link     https://www.hyperf.io
+ * @document https://doc.hyperf.io
+ * @contact  group@hyperf.io
+ * @license  https://github.com/hyperf-cloud/hyperf/blob/master/LICENSE
+ */
 
 namespace Hyperf\Telemetry\Contract;
 
@@ -10,7 +18,9 @@ namespace Hyperf\Telemetry\Contract;
  */
 interface GaugeInterface
 {
-    public function with(string ...$labelValues) : self;
+    public function with(string ...$labelValues): self;
+
     public function set(float $value);
+
     public function add(float $delta);
 }

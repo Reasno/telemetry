@@ -16,7 +16,7 @@ use Hyperf\Di\Annotation\Aspect;
 use Hyperf\Di\Aop\AroundInterface;
 use Hyperf\Di\Aop\ProceedingJoinPoint;
 use Hyperf\Telemetry\Annotation\Histogram;
-use Hyperf\Telemetry\Contract\HistogramInterface;
+use Hyperf\Telemetry\Contract\TelemetryFactoryInterface;
 use Hyperf\Telemetry\Timer;
 
 /**
@@ -35,9 +35,11 @@ class HistogramAnnotationAspect implements AroundInterface
      */
     private $factory;
 
-    public function __construct(TelemetryFactoryInterface $factory)
+    public function __construct()
     {
-        $this->factory = $factory;
+        // Must inject a short lived instance because the underlying class
+        // is subject to the value of the configuration.
+        $this->factory = make(TelemetryFactoryInterface::class);
     }
 
     /**

@@ -1,6 +1,14 @@
 <?php
 
 declare(strict_types=1);
+/**
+ * This file is part of Hyperf.
+ *
+ * @link     https://www.hyperf.io
+ * @document https://doc.hyperf.io
+ * @contact  group@hyperf.io
+ * @license  https://github.com/hyperf-cloud/hyperf/blob/master/LICENSE
+ */
 
 namespace Hyperf\Telemetry\Adapter\RemoteProxy;
 
@@ -12,7 +20,8 @@ class Gauge implements GaugeInterface
     /**
      * @var string
      */
-    protected const TARGET_PROCESS_NAME = "telemetry";
+    protected const TARGET_PROCESS_NAME = 'telemetry';
+
     /**
      * @var string
      */
@@ -21,12 +30,12 @@ class Gauge implements GaugeInterface
     /**
      * @var string[];
      */
-    public $labelNames;
+    public $labelNames = [];
 
     /**
      * @var string[]
      */
-    public $labelValues;
+    public $labelValues = [];
 
     /**
      * @var float

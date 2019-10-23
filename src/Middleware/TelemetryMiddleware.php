@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 namespace Hyperf\Telemetry\Middleware;
 
-use Hyperf\Telemetry\Adapter\RemoteProxy\TelemetryFactory;
+use Hyperf\Telemetry\Contract\TelemetryFactoryInterface;
 use Hyperf\Telemetry\Timer;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -21,15 +21,16 @@ use Psr\Http\Server\RequestHandlerInterface;
 
 class TelemetryMiddleware implements MiddlewareInterface
 {
-
     /**
      * @var TelemetryFactoryInterface
      */
     private $factory;
 
-    public function __construct(TelemetryFactory $factory)
+    public function __construct()
     {
-        $this->factory = $factory;
+        // Must inject a short lived instance because the underlying class
+        // is subject to the value of the configuration.
+        $this->factory = make(TelemetryFactoryInterface::class);
     }
 
     /**
@@ -40,16 +41,12 @@ class TelemetryMiddleware implements MiddlewareInterface
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        $counter = $this->factory->makeCounter('request_count', ['request_status','request_path', 'request_method']);
-        $histogram = $this->factory->makeHistogram('request_latency', ['request_status','request_path', 'request_method']);
+        $histogram = $this->factory->makeHistogram('request_latency', ['request_status', 'request_path', 'request_method']);
         $timer = new Timer($histogram);
         $response = $handler->handle($request);
         $timer
-            ->with((string)$response->getStatusCode(), (string)$request->getRequestTarget(), $request->getMethod())
+            ->with((string) $response->getStatusCode(), (string) $request->getRequestTarget(), $request->getMethod())
             ->observeDuration();
-        $counter
-            ->with((string)$response->getStatusCode(), (string)$request->getRequestTarget(), $request->getMethod())
-            ->add(1);
         return $response;
     }
 }

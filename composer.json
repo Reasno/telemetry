@@ -8,7 +8,7 @@
     "description": "hyperf telemetry component",
     "require": {
         "php": ">=7.2",
-        "jimdo/prometheus_client_php": "^0.9.1"
+        "endclothing/prometheus_client_php": "^1.0.1"
     },
     "require-dev": {
         "malukenho/docheader": "^0.1.6",

@@ -12,7 +12,6 @@ declare(strict_types=1);
 
 namespace Hyperf\Telemetry\Adapter\RemoteProxy;
 
-use Hyperf\Contract\ConfigInterface;
 use Hyperf\Telemetry\Contract\CounterInterface;
 use Hyperf\Telemetry\Contract\GaugeInterface;
 use Hyperf\Telemetry\Contract\HistogramInterface;
@@ -28,6 +27,7 @@ class TelemetryFactory implements TelemetryFactoryInterface
             $labelNames
         );
     }
+
     public function makeGauge($name, $labelNames): GaugeInterface
     {
         return new Gauge(
@@ -35,6 +35,7 @@ class TelemetryFactory implements TelemetryFactoryInterface
             $labelNames
         );
     }
+
     public function makeHistogram($name, $labelNames): HistogramInterface
     {
         return new Histogram(
@@ -42,7 +43,9 @@ class TelemetryFactory implements TelemetryFactoryInterface
             $labelNames
         );
     }
-    public function handle(): void {
+
+    public function handle(): void
+    {
         throw new RuntimeException('RemoteProxy adapter cannot be run directly in the telemetry process');
     }
 }

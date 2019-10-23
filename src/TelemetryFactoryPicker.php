@@ -13,22 +13,27 @@ declare(strict_types=1);
 namespace Hyperf\Telemetry;
 
 use Hyperf\Contract\ConfigInterface;
+use Hyperf\Telemetry\Adapter\RemoteProxy\TelemetryFactory;
 use Hyperf\Telemetry\Contract\TelemetryFactoryInterface;
 use Hyperf\Telemetry\Exception\InvalidArgumentException;
 use Psr\Container\ContainerInterface;
 
 class TelemetryFactoryPicker
 {
-    /**
-     * @var ConfigInterface
-     */
-    private $config;
+    public static $isWorker = false;
 
     public function __invoke(ContainerInterface $container)
     {
-        $this->config = $container->get(ConfigInterface::class);
-        $name = $this->config->get('telemetry.default');
-        $driver = $this->config->get("telemetry.telemetry.{$name}.driver");
+        $config = $container->get(ConfigInterface::class);
+        $useStandaloneProcess = $config->get('telemetry.use_standalone_process');
+        // Return a proxy object for workers if user wants to use a dedicated telemetry process.
+        if ($useStandaloneProcess && self::$isWorker) {
+            return $container->get(TelemetryFactory::class);
+        }
+
+        $name = $config->get('telemetry.default');
+        $dedicatedProcess = $config->get('telemetry.telemetry.use_standalone_process');
+        $driver = $config->get("telemetry.telemetry.{$name}.driver");
 
         if (empty($driver)) {
             throw new InvalidArgumentException(
