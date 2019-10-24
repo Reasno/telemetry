@@ -10,10 +10,10 @@ declare(strict_types=1);
  * @license  https://github.com/hyperf-cloud/hyperf/blob/master/LICENSE
  */
 
-namespace Hyperf\Telemetry\Adapter\Statsd;
+namespace Hyperf\Metric\Adapter\Statsd;
 
 use Domnikl\Statsd\Client;
-use Hyperf\Telemetry\Contract\GaugeInterface;
+use Hyperf\Metric\Contract\GaugeInterface;
 
 class Gauge implements GaugeInterface
 {
@@ -35,12 +35,12 @@ class Gauge implements GaugeInterface
     /**
      * @var string[]
      */
-    protected $labelNames;
+    protected $labelNames = [];
 
     /**
      * @var string[]
      */
-    protected $labelValues;
+    protected $labelValues = [];
 
     public function __construct(Client $client, string $name, float $sampleRate, array $labelNames)
     {
@@ -58,7 +58,7 @@ class Gauge implements GaugeInterface
 
     public function set(float $value)
     {
-        $this->client->gauge($this->name, $value, $this->sampleRate, array_combine($this->labelNames, $this->labelValues));
+        $this->client->gauge($this->name, $value, array_combine($this->labelNames, $this->labelValues));
     }
 
     public function add(float $delta)
@@ -66,6 +66,6 @@ class Gauge implements GaugeInterface
         if ($delta >= 0) {
             $delta = '+' + $delta;
         }
-        $this->client->gauge($this->name, $delta, $this->sampleRate, array_combine($this->labelNames, $this->labelValues));
+        $this->client->gauge($this->name, $delta, array_combine($this->labelNames, $this->labelValues));
     }
 }

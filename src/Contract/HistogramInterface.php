@@ -10,7 +10,7 @@ declare(strict_types=1);
  * @license  https://github.com/hyperf-cloud/hyperf/blob/master/LICENSE
  */
 
-namespace Hyperf\Telemetry\Contract;
+namespace Hyperf\Metric\Contract;
 
 /**
  * Histogram describes a metric that takes repeated observations of the same

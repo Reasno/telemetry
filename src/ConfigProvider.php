@@ -10,9 +10,11 @@ declare(strict_types=1);
  * @license  https://github.com/hyperf-cloud/hyperf/blob/master/LICENSE
  */
 
-namespace Hyperf\Telemetry;
+namespace Hyperf\Metric;
 
-use Hyperf\Telemetry\Contract\TelemetryFactoryInterface;
+use Domnikl\Statsd\Connection;
+use Domnikl\Statsd\Connection\UdpSocket;
+use Hyperf\Metric\Contract\MetricFactoryInterface;
 use Prometheus\Storage\Adapter;
 use Prometheus\Storage\InMemory;
 
@@ -22,10 +24,9 @@ class ConfigProvider
     {
         return [
             'dependencies' => [
-                TelemetryFactoryInterface::class => TelemetryFactoryPicker::class,
+                MetricFactoryInterface::class => MetricFactoryPicker::class,
                 Adapter::class => InMemory::class,
-            ],
-            'commands' => [
+                Connection::class => UdpSocket::class,
             ],
             'annotations' => [
                 'scan' => [
@@ -37,9 +38,9 @@ class ConfigProvider
             'publish' => [
                 [
                     'id' => 'config',
-                    'description' => 'The config for telemetry component.',
-                    'source' => __DIR__ . '/../publish/telemetry.php',
-                    'destination' => BASE_PATH . '/config/autoload/telemetry.php',
+                    'description' => 'The config for metric component.',
+                    'source' => __DIR__ . '/../publish/metric.php',
+                    'destination' => BASE_PATH . '/config/autoload/metric.php',
                 ],
             ],
         ];

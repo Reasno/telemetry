@@ -10,9 +10,9 @@ declare(strict_types=1);
  * @license  https://github.com/hyperf-cloud/hyperf/blob/master/LICENSE
  */
 
-namespace Hyperf\Telemetry;
+namespace Hyperf\Metric;
 
-use Hyperf\Telemetry\Contract\HistogramInterface;
+use Hyperf\Metric\Contract\HistogramInterface;
 
 class Timer
 {
@@ -45,5 +45,10 @@ class Timer
     {
         $this->histogram->with(...$labelValues);
         return $this;
+    }
+
+    public function __destruct()
+    {
+        $this->observeDuration();
     }
 }

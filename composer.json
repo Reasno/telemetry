@@ -1,11 +1,11 @@
 {
-    "name": "hyperf/telemetry",
+    "name": "hyperf/metric",
     "license": "MIT",
     "keywords": [
         "php",
         "hyperf"
     ],
-    "description": "hyperf telemetry component",
+    "description": "hyperf metric component",
     "require": {
         "php": ">=7.2",
         "endclothing/prometheus_client_php": "^1.0.1"
@@ -17,16 +17,16 @@
         "friendsofphp/php-cs-fixer": "^2.9"
     },
     "suggest": {
-        "domnikl/statsd": "Required to use StatdD driver.",
+        "domnikl/statsd": "Required to use StatdD driver."
     },
     "autoload": {
         "psr-4": {
-            "Hyperf\\Telemetry\\": "src/"
+            "Hyperf\\Metric\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "HyperfTest\\Telemetry\\": "tests/"
+            "HyperfTest\\Metric\\": "tests/"
         }
     },
     "config": {
@@ -43,7 +43,7 @@
             "dev-master": "1.1-dev"
         },
         "hyperf": {
-            "config": "Hyperf\\Telemetry\\ConfigProvider"
+            "config": "Hyperf\\Metric\\ConfigProvider"
         }
     }
 }

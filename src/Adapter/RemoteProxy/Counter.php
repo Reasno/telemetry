@@ -10,17 +10,17 @@ declare(strict_types=1);
  * @license  https://github.com/hyperf-cloud/hyperf/blob/master/LICENSE
  */
 
-namespace Hyperf\Telemetry\Adapter\RemoteProxy;
+namespace Hyperf\Metric\Adapter\RemoteProxy;
 
 use Hyperf\Process\ProcessCollector;
-use Hyperf\Telemetry\Contract\CounterInterface;
+use Hyperf\Metric\Contract\CounterInterface;
 
 class Counter implements CounterInterface
 {
     /**
      * @var string
      */
-    protected const TARGET_PROCESS_NAME = 'telemetry';
+    protected const TARGET_PROCESS_NAME = 'metric';
 
     /**
      * @var string
@@ -58,6 +58,6 @@ class Counter implements CounterInterface
     {
         $this->delta = $delta;
         $process = ProcessCollector::get(static::TARGET_PROCESS_NAME)[0];
-        $process->exportSocket()->send(serialize($this));
+        $process->write(serialize($this));
     }
 }

@@ -10,15 +10,17 @@ declare(strict_types=1);
  * @license  https://github.com/hyperf-cloud/hyperf/blob/master/LICENSE
  */
 
-namespace Hyperf\Telemetry\Listener;
+namespace Hyperf\Metric\Listener;
 
 use Hyperf\Contract\ConfigInterface;
 use Hyperf\Event\Annotation\Listener;
 use Hyperf\Event\Contract\ListenerInterface;
 use Hyperf\Framework\Event\BeforeWorkerStart;
-use Hyperf\Telemetry\Contract\GaugeInterface;
-use Hyperf\Telemetry\Contract\TelemetryFactoryInterface;
-use Hyperf\Telemetry\TelemetryFactoryPicker;
+use Hyperf\Metric\Contract\GaugeInterface;
+use Hyperf\Metric\Contract\MetricFactoryInterface;
+use Hyperf\Metric\Event\MetricFactoryReady;
+use Hyperf\Metric\MetricFactoryPicker;
+use Psr\Container\ContainerInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Swoole\Coroutine;
 use Swoole\Server;
@@ -27,17 +29,17 @@ use Swoole\Timer;
 /**
  * @Listener
  */
-class OnWorkerStartListener implements ListenerInterface
+class OnWorkerStart implements ListenerInterface
 {
     /**
-     * @var TelemetryFactoryInterface
+     * ContainerInterface
      */
-    protected $factory;
+    protected $container;
 
     /**
-     * @var EventDispatcherInterface
+     * @var MetricFactoryInterface
      */
-    private $eventDispatcher;
+    protected $factory;
 
     /**
      * @var ConfigInterface
@@ -46,8 +48,9 @@ class OnWorkerStartListener implements ListenerInterface
 
     public function __construct(ContainerInterface $container)
     {
-        $this->eventDispatcher = $container->get(EventDispatcherInterface::class);
+        $this->container = $container;
         $this->config = $container->get(ConfigInterface::class);
+        $this->factory = $container->get(MetricFactoryInterface::class);
     }
 
     /**
@@ -66,13 +69,34 @@ class OnWorkerStartListener implements ListenerInterface
      */
     public function process(object $event)
     {
-        TelemetryFactoryPicker::$isWorker = true;
         $workerId = $event->workerId;
-        if ( $this->shouldFireTelemetryRegistryReadyEvent($workerId) ){
-            $this->eventDispatcher->dispatch(new TelemetryRegistryReady());
-        }
-        $this->factory = make(TelemetryFactoryInterface::class);
 
+        if ($workerId === null) {
+            return;
+        }
+
+        /**
+         * If no standalone process is started, we have to do handle metrics on worker.
+         */
+        if (!$this->config->get('metric.use_standalone_process', true)) {
+            go(function () {
+                $this->factory->handle();
+            });
+        }
+
+        /**
+         * Allow user to hook up their own metrics logic
+         */
+        if ($this->shouldFireMetricFactoryReadyEvent($workerId)) {
+            $eventDispatcher = $this->container->get(EventDispatcherInterface::class);
+            $eventDispatcher->dispatch(new MetricFactoryReady($this->factory));
+        }
+
+        if (!$this->config->get('metric.enable_default_metric', false)) {
+            return;
+        }
+
+        // The following metrics MUST be collected in worker.
         $metrics = $this->factoryMetrics(
             $workerId,
             'memory_usage',
@@ -80,7 +104,8 @@ class OnWorkerStartListener implements ListenerInterface
             'worker_request_count',
             'worker_dispatch_count'
         );
-        $server = make(Server::class);
+
+        $server = $this->container->get(Server::class);
 
         Timer::tick(5000, function () use ($metrics, $server) {
             $serverStats = $server->stats();
@@ -109,8 +134,9 @@ class OnWorkerStartListener implements ListenerInterface
         return $out;
     }
 
-    private function shouldFireTelemetryRegistryReadyEvent(int $workerId): bool {
-        return (!$this->config->get('telemetry.use_standalone_processs'))
+    private function shouldFireMetricFactoryReadyEvent(int $workerId): bool
+    {
+        return (!$this->config->get('metric.use_standalone_process'))
             && $workerId == 0;
     }
 }

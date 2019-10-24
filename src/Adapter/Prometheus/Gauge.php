@@ -10,9 +10,9 @@ declare(strict_types=1);
  * @license  https://github.com/hyperf-cloud/hyperf/blob/master/LICENSE
  */
 
-namespace Hyperf\Telemetry\Adapter\Prometheus;
+namespace Hyperf\Metric\Adapter\Prometheus;
 
-use Hyperf\Telemetry\Contract\GaugeInterface;
+use Hyperf\Metric\Contract\GaugeInterface;
 
 class Gauge implements GaugeInterface
 {
@@ -29,7 +29,7 @@ class Gauge implements GaugeInterface
     /**
      * @var string[]
      */
-    protected $labelValues;
+    protected $labelValues = [];
 
     public function __construct(\Prometheus\CollectorRegistry $registry, string $namespace, string $name, string $help, array $labelNames)
     {

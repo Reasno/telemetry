@@ -10,13 +10,13 @@ declare(strict_types=1);
  * @license  https://github.com/hyperf-cloud/hyperf/blob/master/LICENSE
  */
 
-namespace Hyperf\Telemetry\Aspect;
+namespace Hyperf\Metric\Aspect;
 
 use Hyperf\Di\Annotation\Aspect;
 use Hyperf\Di\Aop\AroundInterface;
 use Hyperf\Di\Aop\ProceedingJoinPoint;
-use Hyperf\Telemetry\Annotation\Counter;
-use Hyperf\Telemetry\Contract\TelemetryFactoryInterface;
+use Hyperf\Metric\Annotation\Counter;
+use Hyperf\Metric\Contract\MetricFactoryInterface;
 
 /**
  * @Aspect
@@ -30,15 +30,13 @@ class CounterAnnotationAspect implements AroundInterface
     ];
 
     /**
-     * @var TelemetryFactoryInterface
+     * @var MetricFactoryInterface
      */
     private $factory;
 
-    public function __construct()
+    public function __construct(MetricFactoryInterface $factory)
     {
-        // Must inject a short lived instance because the underlying class
-        // is subject to change based on the runtime and configuration.
-        $this->factory = make(TelemetryFactoryInterface::class);
+        $this->factory = $factory;
     }
 
     /**
@@ -52,7 +50,7 @@ class CounterAnnotationAspect implements AroundInterface
         if ($annotation = $metadata->method[Counter::class] ?? null) {
             $name = $annotation->name;
         } else {
-            $name = $source;
+            $name = $proceedingJoinPoint->methodName;
         }
         $counter = $this->factory->makeCounter($name, ['source']);
         $result = $proceedingJoinPoint->process();

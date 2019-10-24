@@ -10,7 +10,7 @@ declare(strict_types=1);
  * @license  https://github.com/hyperf-cloud/hyperf/blob/master/LICENSE
  */
 
-namespace Hyperf\Telemetry\Annotation;
+namespace Hyperf\Metric\Annotation;
 
 use Doctrine\Common\Annotations\Annotation\Target;
 use Hyperf\Di\Annotation\AbstractAnnotation;

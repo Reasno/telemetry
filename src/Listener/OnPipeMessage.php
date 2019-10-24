@@ -10,31 +10,26 @@ declare(strict_types=1);
  * @license  https://github.com/hyperf-cloud/hyperf/blob/master/LICENSE
  */
 
-namespace Hyperf\Telemetry\Listener;
+namespace Hyperf\Metric\Listener;
 
 use Hyperf\Event\Annotation\Listener;
 use Hyperf\Event\Contract\ListenerInterface;
 use Hyperf\Process\Event\PipeMessage;
-use Hyperf\Telemetry\Adapter\RemoteProxy\Counter;
-use Hyperf\Telemetry\Adapter\RemoteProxy\Gauge;
-use Hyperf\Telemetry\Adapter\RemoteProxy\Histogram;
-use Hyperf\Telemetry\Contract\TelemetryFactoryInterface;
+use Hyperf\Metric\Adapter\RemoteProxy\Counter;
+use Hyperf\Metric\Adapter\RemoteProxy\Gauge;
+use Hyperf\Metric\Adapter\RemoteProxy\Histogram;
+use Hyperf\Metric\Contract\MetricFactoryInterface;
 use Psr\Container\ContainerInterface;
 
 /**
  * @Listener
  */
-class OnPipeMessageListener implements ListenerInterface
+class OnPipeMessage implements ListenerInterface
 {
     /**
-     * @var TelemetryFactoryInterface
+     * @var MetricFactoryInterface
      */
     private $factory;
-
-    public function __construct(ContainerInterface $container)
-    {
-        $this->factory = $container->get(TelemetryFactoryInterface::class);
-    }
 
     /**
      * @return string[] returns the events that you want to listen
@@ -52,6 +47,7 @@ class OnPipeMessageListener implements ListenerInterface
      */
     public function process(object $event)
     {
+        $this->factory = make(MetricFactoryInterface::class);
         if (property_exists($event, 'data') && $event instanceof PipeMessage) {
             $inner = $event->data;
             switch (true) {

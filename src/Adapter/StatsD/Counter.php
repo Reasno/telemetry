@@ -10,10 +10,10 @@ declare(strict_types=1);
  * @license  https://github.com/hyperf-cloud/hyperf/blob/master/LICENSE
  */
 
-namespace Hyperf\Telemetry\Adapter\StatsD;
+namespace Hyperf\Metric\Adapter\StatsD;
 
 use Domnikl\Statsd\Client;
-use Hyperf\Telemetry\Contract\CounterInterface;
+use Hyperf\Metric\Contract\CounterInterface;
 
 class Counter implements CounterInterface
 {
@@ -35,12 +35,12 @@ class Counter implements CounterInterface
     /**
      * @var string[]
      */
-    protected $labelNames;
+    protected $labelNames = [];
 
     /**
      * @var string[]
      */
-    protected $labelValues;
+    protected $labelValues = [];
 
     public function __construct(Client $client, string $name, float $sampleRate, array $labelNames)
     {

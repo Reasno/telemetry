@@ -10,17 +10,17 @@ declare(strict_types=1);
  * @license  https://github.com/hyperf-cloud/hyperf/blob/master/LICENSE
  */
 
-namespace Hyperf\Telemetry\Adapter\RemoteProxy;
+namespace Hyperf\Metric\Adapter\RemoteProxy;
 
 use Hyperf\Process\ProcessCollector;
-use Hyperf\Telemetry\Contract\GaugeInterface;
+use Hyperf\Metric\Contract\GaugeInterface;
 
 class Gauge implements GaugeInterface
 {
     /**
      * @var string
      */
-    protected const TARGET_PROCESS_NAME = 'telemetry';
+    protected const TARGET_PROCESS_NAME = 'metric';
 
     /**
      * @var string
@@ -72,6 +72,6 @@ class Gauge implements GaugeInterface
         $this->delta = $delta;
         $this->value = null;
         $process = ProcessCollector::get(static::TARGET_PROCESS_NAME)[0];
-        $process->exportSocket()->send(serialize($this));
+        $process->write(serialize($this));
     }
 }

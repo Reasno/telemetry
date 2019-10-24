@@ -10,10 +10,10 @@ declare(strict_types=1);
  * @license  https://github.com/hyperf-cloud/hyperf/blob/master/LICENSE
  */
 
-namespace Hyperf\Telemetry\Adapter\Statsd;
+namespace Hyperf\Metric\Adapter\Statsd;
 
 use Domnikl\Statsd\Client;
-use Hyperf\Telemetry\Contract\HistogramInterface;
+use Hyperf\Metric\Contract\HistogramInterface;
 
 class Histogram implements HistogramInterface
 {
@@ -35,12 +35,12 @@ class Histogram implements HistogramInterface
     /**
      * @var string[]
      */
-    protected $labelNames;
+    protected $labelNames = [];
 
     /**
      * @var string[]
      */
-    protected $labelValues;
+    protected $labelValues = [];
 
     public function __construct(Client $client, string $name, float $sampleRate, array $labelNames)
     {

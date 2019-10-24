@@ -10,17 +10,17 @@ declare(strict_types=1);
  * @license  https://github.com/hyperf-cloud/hyperf/blob/master/LICENSE
  */
 
-namespace Hyperf\Telemetry\Adapter\RemoteProxy;
+namespace Hyperf\Metric\Adapter\RemoteProxy;
 
 use Hyperf\Process\ProcessCollector;
-use Hyperf\Telemetry\Contract\HistogramInterface;
+use Hyperf\Metric\Contract\HistogramInterface;
 
 class Histogram implements HistogramInterface
 {
     /**
      * @var string
      */
-    protected const TARGET_PROCESS_NAME = 'telemetry';
+    protected const TARGET_PROCESS_NAME = 'metric';
 
     /**
      * @var string
@@ -58,6 +58,6 @@ class Histogram implements HistogramInterface
     {
         $this->value = $value;
         $process = ProcessCollector::get(static::TARGET_PROCESS_NAME)[0];
-        $process->exportSocket()->send(serialize($this));
+        $process->write(serialize($this));
     }
 }

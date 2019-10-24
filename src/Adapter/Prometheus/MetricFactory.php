@@ -10,21 +10,22 @@ declare(strict_types=1);
  * @license  https://github.com/hyperf-cloud/hyperf/blob/master/LICENSE
  */
 
-namespace Hyperf\Telemetry\Adapter\Prometheus;
+namespace Hyperf\Metric\Adapter\Prometheus;
 
 use Hyperf\Contract\ConfigInterface;
 use Hyperf\Guzzle\ClientFactory as GuzzleClientFactory;
-use Hyperf\Telemetry\Contract\CounterInterface;
-use Hyperf\Telemetry\Contract\GaugeInterface;
-use Hyperf\Telemetry\Contract\HistogramInterface;
-use Hyperf\Telemetry\Contract\TelemetryFactoryInterface;
-use Hyperf\Telemetry\Exception\RuntimeException;
+use Hyperf\Metric\Contract\CounterInterface;
+use Hyperf\Metric\Contract\GaugeInterface;
+use Hyperf\Metric\Contract\HistogramInterface;
+use Hyperf\Metric\Contract\MetricFactoryInterface;
+use Hyperf\Metric\Exception\InvalidArgumentException;
+use Hyperf\Metric\Exception\RuntimeException;
 use Hyperf\Utils\Coroutine;
 use Prometheus\CollectorRegistry;
 use Prometheus\RenderTextFormat;
 use Swoole\Coroutine\Http\Server;
 
-class TelemetryFactory implements TelemetryFactoryInterface
+class MetricFactory implements MetricFactoryInterface
 {
     /**
      * @var ConfigInterface
@@ -37,15 +38,21 @@ class TelemetryFactory implements TelemetryFactoryInterface
     private $registry;
 
     /**
-     * GuzzleClientFactory.
+     * @var GuzzleClientFactory.
      */
     private $guzzleClientFactory;
+
+    /**
+     * @var string
+     */
+    private $name;
 
     public function __construct(ConfigInterface $config, CollectorRegistry $registry, GuzzleClientFactory $guzzleClientFactory)
     {
         $this->config = $config;
         $this->registry = $registry;
         $this->guzzleClientFactory = $guzzleClientFactory;
+        $this->name = $this->config->get('metric.default');
         $this->guardConfig();
     }
 
@@ -55,7 +62,7 @@ class TelemetryFactory implements TelemetryFactoryInterface
             $this->registry,
             $this->getNamespace(),
             $name,
-            'count ' . $name,
+            'count ' . str_replace('_', ' ', $name),
             $labelNames
         );
     }
@@ -66,7 +73,7 @@ class TelemetryFactory implements TelemetryFactoryInterface
             $this->registry,
             $this->getNamespace(),
             $name,
-            'gauge ' . $name,
+            'gauge ' . str_replace('_', ' ', $name),
             $labelNames
         );
     }
@@ -77,57 +84,64 @@ class TelemetryFactory implements TelemetryFactoryInterface
             $this->registry,
             $this->getNamespace(),
             $name,
-            'measure ' . $name,
+            'measure ' . str_replace('_', ' ', $name),
             $labelNames
         );
     }
 
     public function handle(): void
     {
-        $name = $this->config->get('telemetry.default');
-        if ($this->config->get("telemetry.telemetry.{$name}.mode") == Constants::PULL_MODE) {
-            $host = $this->config->get("telemetry.telemetry.{$name}.scrape_host");
-            $port = $this->config->get("telemetry.telemetry.{$name}.scrape_port");
-            $path = $this->config->get("telemetry.telemetry.{$name}.scrape_path");
-            $renderer = new RenderTextFormat();
-            go(function () use ($renderer, $host, $port, $path) {
-                $server = new Server($host, (int) $port, false);
-                $server->handle($path, function ($request, $response) use ($renderer) {
-                    $response->header('Content-Type', 'text/plain');
-                    $response->header('X-Content-Type-Options', 'nosniff');
-                    $response->end($renderer->render($this->registry->getMetricFamilySamples()));
-                });
-                $server->start();
-            });
+        
+        switch ($this->config->get("metric.metric.{$this->name}.mode")) {
+            case Constants::SCRAPE_MODE:
+                $this->pullHandle();
+                break;
+            case Constants::PUSH_MODE:
+                $this->pushHandle();
+                break;
+            default:
+                throw new InvalidArgumentException('Unsupported Prometheus mode encountered');
+                break;
         }
+    }
 
-        // Block handle from returning.
+    protected function pullHandle()
+    {
+        $host = $this->config->get("metric.metric.{$this->name}.scrape_host");
+        $port = $this->config->get("metric.metric.{$this->name}.scrape_port");
+        $path = $this->config->get("metric.metric.{$this->name}.scrape_path");
+        $renderer = new RenderTextFormat();
+        $server = new Server($host, (int) $port, false);
+        $server->handle($path, function ($request, $response) use ($renderer) {
+            $response->header('Content-Type', 'text/plain');
+            $response->header('X-Content-Type-Options', 'nosniff');
+            $response->end($renderer->render($this->registry->getMetricFamilySamples()));
+        });
+        $server->start();
+    }
+
+    protected function pushHandle()
+    {
         while (true) {
-            if ($this->config->get("telemetry.telemetry.{$name}.mode") == Constants::PUSH_MODE) {
-                $inteval = $this->config->get("telemetry.telemetry.{$name}.push_inteval");
-                $host = $this->config->get("telemetry.telemetry.{$name}.push_host");
-                $port = $this->config->get("telemetry.telemetry.{$name}.push_port");
-                $this->doRequest("{$host}:{$port}", $this->getNamespace(), null, 'put');
-                Coroutine::sleep($inteval);
-            } else {
-                Coroutine::sleep(100);
-            }
+            $inteval = $this->config->get("metric.metric.{$this->name}.push_inteval", 5);
+            $host = $this->config->get("metric.metric.{$this->name}.push_host");
+            $port = $this->config->get("metric.metric.{$this->name}.push_port");
+            $this->doRequest("{$host}:{$port}", $this->getNamespace(), null, 'put');
+            Coroutine::sleep($inteval);
         }
     }
 
     private function getNamespace(): string
     {
-        $name = $this->config->get('telemetry.default');
-        return $this->config->get("telemetry.telemetry.{$name}.namespace");
+        return $this->config->get("metric.metric.{$this->name}.namespace");
     }
 
     private function guardConfig()
     {
-        $name = $this->config->get('telemetry.default');
-        if ($this->config->get("telemetry.telemetry.{$name}.mode") == Constants::PULL_MODE &&
-            $this->config->get('telemetry.use_standalone_process') == false) {
+        if ($this->config->get("metric.metric.{$this->name}.mode") == Constants::SCRAPE_MODE &&
+            $this->config->get('metric.use_standalone_process') == false) {
             throw new RuntimeException(
-                "Prometheus in pull mode must be used in conjunction with standalone process. \n Set telemetry.use_standalone_process to true to avoid this error."
+                "Prometheus in pull mode must be used in conjunction with standalone process. \n Set metric.use_standalone_process to true to avoid this error."
             );
         }
     }

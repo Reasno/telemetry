@@ -10,20 +10,20 @@ declare(strict_types=1);
  * @license  https://github.com/hyperf-cloud/hyperf/blob/master/LICENSE
  */
 
-namespace Hyperf\Telemetry\Adapter\StatsD;
+namespace Hyperf\Metric\Adapter\StatsD;
 
 use Domnikl\Statsd\Client;
-use Domnikl\Statsd\Connection\UdpSocket;
+use Domnikl\Statsd\Connection;
 use Hyperf\Contract\ConfigInterface;
-use Hyperf\Telemetry\Adapter\Statsd\Gauge;
-use Hyperf\Telemetry\Adapter\Statsd\Histogram;
-use Hyperf\Telemetry\Contract\CounterInterface;
-use Hyperf\Telemetry\Contract\GaugeInterface;
-use Hyperf\Telemetry\Contract\HistogramInterface;
-use Hyperf\Telemetry\Contract\TelemetryFactoryInterface;
+use Hyperf\Metric\Adapter\Statsd\Gauge;
+use Hyperf\Metric\Adapter\Statsd\Histogram;
+use Hyperf\Metric\Contract\CounterInterface;
+use Hyperf\Metric\Contract\GaugeInterface;
+use Hyperf\Metric\Contract\HistogramInterface;
+use Hyperf\Metric\Contract\MetricFactoryInterface;
 use Hyperf\Utils\Coroutine;
 
-class TelemetryFactory implements TelemetryFactoryInterface
+class MetricFactory implements MetricFactoryInterface
 {
     /**
      * @var ConfigInterface
@@ -44,8 +44,8 @@ class TelemetryFactory implements TelemetryFactoryInterface
     {
         $this->config = $config;
         $this->client = make(Client::class, [
-            'connection' => $this->getConnection(), 
-            'namespace' => $this->getNamespace(), 
+            'connection' => $this->getConnection(),
+            'namespace' => $this->getNamespace(),
             'sampleRateAllMetrics' => $this->getSampleRate()
         ]);
     }
@@ -82,9 +82,9 @@ class TelemetryFactory implements TelemetryFactoryInterface
 
     public function handle(): void
     {
-        $name = $this->config->get('telemetry.default');
-        $batchInteval = $this->config->get("telemetry.telemetry.{$name}.batch_inteval") ?? 5;
-        $batchEnabled = $this->config->get("telemetry.telemetry.{$name}.batch") == true;
+        $name = $this->config->get('metric.default');
+        $batchInteval = $this->config->get("metric.metric.{$name}.batch_inteval", 5);
+        $batchEnabled = $this->config->get("metric.metric.{$name}.batch") == true;
         // Block handle from returning.
         do {
             if ($batchEnabled) {
@@ -92,28 +92,33 @@ class TelemetryFactory implements TelemetryFactoryInterface
                 Coroutine::sleep((int) $batchInteval);
                 $this->client->endBatch();
             } else {
-                Coroutine::sleep((int) $batchInteval);
+                Coroutine::sleep(5000);
             }
         } while (true);
     }
 
-    protected function getConnection(): string
+    protected function getConnection(): Connection
     {
-        $name = $this->config->get('telemetry.default');
-        $host = $this->config->get("telemetry.telemetry.{$name}.udp_host");
-        $port = $this->config->get("telemetry.telemetry.{$name}.udp_port");
-        return new UdpSocket($host, (int) $port);
+        $name = $this->config->get('metric.default');
+        $host = $this->config->get("metric.metric.{$name}.udp_host");
+        $port = $this->config->get("metric.metric.{$name}.udp_port");
+        return make(Connection::class, [
+            'host' => $host, 
+            'port' => (int) $port, 
+            'timeout' => null, 
+            'persistent' => true,
+        ]);
     }
 
     protected function getNamespace(): string
     {
-        $name = $this->config->get('telemetry.default');
-        return $this->config->get("telemetry.telemetry.{$name}.namespace");
+        $name = $this->config->get('metric.default');
+        return $this->config->get("metric.metric.{$name}.namespace");
     }
 
     protected function getSampleRate(): float
     {
-        $name = $this->config->get('telemetry.default');
-        return $this->config->get("telemetry.telemetry.{$name}.sample_rate");
+        $name = $this->config->get('metric.default');
+        return $this->config->get("metric.metric.{$name}.sample_rate", 1.0);
     }
 }

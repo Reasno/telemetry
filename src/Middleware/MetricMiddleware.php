@@ -10,27 +10,25 @@ declare(strict_types=1);
  * @license  https://github.com/hyperf-cloud/hyperf/blob/master/LICENSE
  */
 
-namespace Hyperf\Telemetry\Middleware;
+namespace Hyperf\Metric\Middleware;
 
-use Hyperf\Telemetry\Contract\TelemetryFactoryInterface;
-use Hyperf\Telemetry\Timer;
+use Hyperf\Metric\Contract\MetricFactoryInterface;
+use Hyperf\Metric\Timer;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
-class TelemetryMiddleware implements MiddlewareInterface
+class MetricMiddleware implements MiddlewareInterface
 {
     /**
-     * @var TelemetryFactoryInterface
+     * @var MetricFactoryInterface
      */
     private $factory;
 
-    public function __construct()
+    public function __construct(MetricFactoryInterface $factory)
     {
-        // Must inject a short lived instance because the underlying class
-        // is subject to the value of the configuration.
-        $this->factory = make(TelemetryFactoryInterface::class);
+        $this->factory = $factory;
     }
 
     /**
@@ -44,9 +42,7 @@ class TelemetryMiddleware implements MiddlewareInterface
         $histogram = $this->factory->makeHistogram('request_latency', ['request_status', 'request_path', 'request_method']);
         $timer = new Timer($histogram);
         $response = $handler->handle($request);
-        $timer
-            ->with((string) $response->getStatusCode(), (string) $request->getRequestTarget(), $request->getMethod())
-            ->observeDuration();
+        $timer->with((string) $response->getStatusCode(), (string) $request->getRequestTarget(), $request->getMethod());
         return $response;
     }
 }

@@ -10,11 +10,11 @@ declare(strict_types=1);
  * @license  https://github.com/hyperf-cloud/hyperf/blob/master/LICENSE
  */
 
-namespace Hyperf\Telemetry\Adapter\Prometheus;
+namespace Hyperf\Metric\Adapter\Prometheus;
 
 class Constants
 {
-    const PULL_MODE = 1;
+    const SCRAPE_MODE = 1;
 
     const PUSH_MODE = 2;
 }

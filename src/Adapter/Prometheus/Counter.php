@@ -10,9 +10,9 @@ declare(strict_types=1);
  * @license  https://github.com/hyperf-cloud/hyperf/blob/master/LICENSE
  */
 
-namespace Hyperf\Telemetry\Adapter\Prometheus;
+namespace Hyperf\Metric\Adapter\Prometheus;
 
-use Hyperf\Telemetry\Contract\CounterInterface;
+use Hyperf\Metric\Contract\CounterInterface;
 use Prometheus\CollectorRegistry;
 
 class Counter implements CounterInterface
@@ -30,7 +30,7 @@ class Counter implements CounterInterface
     /**
      * @var string[]
      */
-    protected $labelValues;
+    protected $labelValues = [];
 
     public function __construct(CollectorRegistry $registry, string $namespace, string $name, string $help, array $labelNames)
     {

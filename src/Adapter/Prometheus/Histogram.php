@@ -10,9 +10,9 @@ declare(strict_types=1);
  * @license  https://github.com/hyperf-cloud/hyperf/blob/master/LICENSE
  */
 
-namespace Hyperf\Telemetry\Adapter\Prometheus;
+namespace Hyperf\Metric\Adapter\Prometheus;
 
-use Hyperf\Telemetry\Contract\HistogramInterface;
+use Hyperf\Metric\Contract\HistogramInterface;
 use Prometheus\CollectorRegistry;
 
 class Histogram implements HistogramInterface
@@ -30,7 +30,7 @@ class Histogram implements HistogramInterface
     /**
      * @var string[]
      */
-    protected $labelValues;
+    protected $labelValues = [];
 
     public function __construct(CollectorRegistry $registry, string $namespace, string $name, string $help, array $labelNames)
     {

@@ -10,15 +10,15 @@ declare(strict_types=1);
  * @license  https://github.com/hyperf-cloud/hyperf/blob/master/LICENSE
  */
 
-namespace Hyperf\Telemetry\Adapter\RemoteProxy;
+namespace Hyperf\Metric\Adapter\RemoteProxy;
 
-use Hyperf\Telemetry\Contract\CounterInterface;
-use Hyperf\Telemetry\Contract\GaugeInterface;
-use Hyperf\Telemetry\Contract\HistogramInterface;
-use Hyperf\Telemetry\Contract\TelemetryFactoryInterface;
-use Hyperf\Telemetry\Exception\RuntimeException;
+use Hyperf\Metric\Contract\CounterInterface;
+use Hyperf\Metric\Contract\GaugeInterface;
+use Hyperf\Metric\Contract\HistogramInterface;
+use Hyperf\Metric\Contract\MetricFactoryInterface;
+use Hyperf\Metric\Exception\RuntimeException;
 
-class TelemetryFactory implements TelemetryFactoryInterface
+class MetricFactory implements MetricFactoryInterface
 {
     public function makeCounter($name, $labelNames): CounterInterface
     {
@@ -46,6 +46,6 @@ class TelemetryFactory implements TelemetryFactoryInterface
 
     public function handle(): void
     {
-        throw new RuntimeException('RemoteProxy adapter cannot be run directly in the telemetry process');
+        throw new RuntimeException('RemoteProxy adapter cannot be run directly in the metric process');
     }
 }
