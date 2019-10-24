@@ -66,16 +66,14 @@ class OnTelemetryRegistryReady implements ListenerInterface
             'close_count',
             'worker_num',
             'idle_worker_num',
-            'tasking_num',''
-            'request_count',
+            'tasking_num',
+            'request_count'
         );
         $server = make(Server::class);
 
         Timer::tick(5000, function () use ($metrics, $server) {
             $serverStats = $server->stats();
             $coroutineStats = Coroutine::stats();
-            $metrics['memory_usage']->set(\memory_get_usage());
-            $metrics['memory_peak_usage']->set(\memory_get_peak_usage());
             $load = sys_getloadavg();
             $metrics['sys_load']->set($load[0] / \swoole_cpu_num());
             $metrics['event_num']->set($coroutineStats['event_num']);
