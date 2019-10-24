@@ -16,7 +16,9 @@ use Hyperf\Contract\ConfigInterface;
 use Hyperf\Process\AbstractProcess;
 use Hyperf\Process\Annotation\Process;
 use Hyperf\Telemetry\Contract\TelemetryFactoryInterface;
+use Hyperf\Telemetry\Event\TelemetryRegistryReady;
 use Psr\Container\ContainerInterface;
+use Psr\EventDispatcher\EventDispatcherInterface;
 
 /**
  * Class Process.
@@ -37,6 +39,7 @@ class TelemetryProcess extends AbstractProcess
     {
         parent::__construct($container);
         $this->factory = $factory;
+        $this->eventDispatcher = $container->get()
     }
 
     public function isEnable(): bool
@@ -50,6 +53,12 @@ class TelemetryProcess extends AbstractProcess
      */
     public function handle(): void
     {
-        $this->factory->handle();
+        $this
+            ->container
+            ->get(EventDispatcherInterface::class)
+            ->dispatch(new TelemetryRegistryReady());
+        $this
+            ->factory
+            ->handle();
     }
 }

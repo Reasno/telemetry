@@ -43,7 +43,11 @@ class TelemetryFactory implements TelemetryFactoryInterface
     public function __construct(ConfigInterface $config)
     {
         $this->config = $config;
-        $this->client = make(Client::class, [$this->getConnection(), $this->getNamespace(), $this->getSampleRate()]);
+        $this->client = make(Client::class, [
+            'connection' => $this->getConnection(), 
+            'namespace' => $this->getNamespace(), 
+            'sampleRateAllMetrics' => $this->getSampleRate()
+        ]);
     }
 
     public function makeCounter($name, $labelNames): CounterInterface
