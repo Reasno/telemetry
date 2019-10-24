@@ -99,8 +99,6 @@ class OnWorkerStart implements ListenerInterface
         // The following metrics MUST be collected in worker.
         $metrics = $this->factoryMetrics(
             $workerId,
-            'memory_usage',
-            'memory_peak_usage',
             'worker_request_count',
             'worker_dispatch_count'
         );
@@ -109,8 +107,6 @@ class OnWorkerStart implements ListenerInterface
 
         Timer::tick(5000, function () use ($metrics, $server) {
             $serverStats = $server->stats();
-            $metrics['memory_usage']->set(\memory_get_usage());
-            $metrics['memory_peak_usage']->set(\memory_get_peak_usage());
             $metrics['worker_request_count']->set($serverStats['worker_request_count']);
             $metrics['worker_dispatch_count']->set($serverStats['worker_dispatch_count']);
         });

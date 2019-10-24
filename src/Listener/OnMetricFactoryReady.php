@@ -72,6 +72,8 @@ class OnMetricFactoryReady implements ListenerInterface
         $this->factory = $event->factory;
         $metrics = $this->factoryMetrics(
             'sys_load',
+            'memory_usage',
+            'memory_peak_usage',
             'event_num',
             'signal_listener_num',
             'aio_task_num',
@@ -99,6 +101,8 @@ class OnMetricFactoryReady implements ListenerInterface
             $this->trySet($metrics, $stats);
             $load = sys_getloadavg();
             $metrics['sys_load']->set($load[0] / \swoole_cpu_num());
+            $metrics['memory_usage']->set(\memory_get_usage());
+            $metrics['memory_peak_usage']->set(\memory_get_peak_usage());
         });
     }
 
